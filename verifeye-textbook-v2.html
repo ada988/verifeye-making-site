@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verifeye — Founder OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06090f;--bg2:#0c1018;--bg3:#111620;--bg4:#161c28;--border:#1e2736;--border2:#253044;--blue:#3b82f6;--blue2:#60a5fa;--blue-dim:rgba(59,130,246,0.12);--green:#10b981;--green2:#34d399;--green-dim:rgba(16,185,129,0.12);--amber:#f59e0b;--amber-dim:rgba(245,158,11,0.12);--red:#ef4444;--red-dim:rgba(239,68,68,0.12);--purple:#a78bfa;--purple-dim:rgba(167,139,250,0.12);--cyan:#06b6d4;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--radius:10px;--transition:0.2s ease}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden}
+/* PASSWORD */
+#pw-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.pw-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);background-size:40px 40px}
+.pw-card{position:relative;z-index:1;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:48px 56px;width:440px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
+.pw-logo{width:52px;height:52px;background:linear-gradient(135deg,var(--blue),var(--green));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 20px;box-shadow:0 8px 32px rgba(59,130,246,0.3)}
+.pw-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
+.pw-sub{color:var(--text3);font-size:13px;margin-bottom:32px;font-style:italic}
+.pw-label{display:block;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.pw-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:15px;letter-spacing:0.08em;outline:none;transition:border-color var(--transition),box-shadow var(--transition);margin-bottom:16px}
+.pw-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
+.pw-btn{width:100%;background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border:none;border-radius:var(--radius);padding:14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity var(--transition),transform var(--transition);letter-spacing:0.02em}
+.pw-btn:hover{opacity:0.9;transform:translateY(-1px)}
+.pw-error{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+.pw-shake{animation:shake 0.4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.pw-confidential{position:absolute;bottom:28px;font-size:11px;color:var(--text4);letter-spacing:0.08em;font-family:'DM Mono',monospace}
+/* APP */
+#app{display:none;min-height:100vh}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;display:flex;flex-direction:column}
+.sidebar-header{padding:22px 20px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sidebar-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sidebar-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--green));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sidebar-brand{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:-0.3px}
+.sidebar-tagline{font-size:11px;color:var(--text3);font-style:italic;margin-left:44px}
+.global-progress{padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.gp-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.gp-text{font-size:11px;color:var(--text3);font-weight:500}
+.gp-pct{font-size:12px;color:var(--green);font-family:'DM Mono',monospace;font-weight:500}
+.gp-bar{height:5px;background:var(--bg4);border-radius:10px;overflow:hidden}
+.gp-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:10px;transition:width 0.5s ease}
+.sidebar-nav{flex:1;padding:10px 0}
+.nav-section-title{padding:12px 20px 4px;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text4)}
+.nav-item{display:flex;align-items:center;padding:9px 20px;cursor:pointer;border-left:2px solid transparent;transition:all var(--transition);gap:10px}
+.nav-item:hover{background:var(--bg3)}
+.nav-item.active{background:var(--blue-dim);border-left-color:var(--blue)}
+.nav-item.active .nav-label{color:var(--blue2)}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.nav-label{font-size:13px;color:var(--text2);flex:1}
+.nav-badge{display:flex;align-items:center;gap:5px}
+.badge-pct{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.badge-dot.done{background:var(--green)}
+.badge-dot.active{background:var(--blue);box-shadow:0 0 6px var(--blue)}
+.sidebar-footer{padding:14px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text4);font-family:'DM Mono',monospace;flex-shrink:0}
+#main{margin-left:280px;min-height:100vh}
+.page{display:none;padding:0}
+.page.active{display:block}
+.page-header{position:sticky;top:0;z-index:50;background:rgba(6,9,15,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px 40px;display:flex;align-items:center;justify-content:space-between}
+.ph-left{display:flex;align-items:center;gap:14px}
+.phase-badge{background:var(--blue-dim);color:var(--blue2);border:1px solid rgba(59,130,246,0.2);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:0.06em;text-transform:uppercase}
+.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.3px}
+.ph-right{display:flex;align-items:center;gap:12px}
+.phase-progress-bar{width:160px;height:6px;background:var(--bg4);border-radius:10px;overflow:hidden}
+.phase-progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:10px;transition:width 0.5s ease}
+.phase-progress-pct{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace}
+.diff-pill{padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase}
+.diff-beginner{background:var(--green-dim);color:var(--green2);border:1px solid rgba(16,185,129,0.2)}
+.diff-intermediate{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
+.diff-advanced{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.content{padding:36px 40px 80px;max-width:960px}
+.section{margin-bottom:44px}
+.section-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px}
+.step-num{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--blue2);flex-shrink:0;margin-top:2px}
+.step-info{flex:1}
+.step-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.step-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.2px}
+.step-time{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;background:var(--bg3);border:1px solid var(--border);padding:2px 8px;border-radius:4px}
+.step-desc{color:var(--text2);font-size:14px}
+.callout{border-radius:var(--radius);padding:16px 20px;margin:16px 0;border-left:3px solid}
+.callout-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.callout-icon{font-size:16px}
+.callout-title{font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase}
+.callout-body{font-size:14px;line-height:1.65;color:var(--text2)}
+.callout-body strong{color:var(--text)}
+.callout.explain{background:var(--green-dim);border-color:var(--green)}
+.callout.explain .callout-title{color:var(--green)}
+.callout.prompt{background:var(--purple-dim);border-color:var(--purple)}
+.callout.prompt .callout-title{color:var(--purple)}
+.callout.learn{background:rgba(6,182,212,0.08);border-color:var(--cyan)}
+.callout.learn .callout-title{color:var(--cyan)}
+.callout.warning{background:var(--amber-dim);border-color:var(--amber)}
+.callout.warning .callout-title{color:var(--amber)}
+.callout.critical{background:var(--red-dim);border-color:var(--red)}
+.callout.critical .callout-title{color:var(--red)}
+.callout.tip{background:var(--blue-dim);border-color:var(--blue)}
+.callout.tip .callout-title{color:var(--blue2)}
+.callout.hire{background:rgba(251,146,60,0.1);border-color:#fb923c}
+.callout.hire .callout-title{color:#fb923c}
+.callout.solo{background:var(--green-dim);border-color:var(--green2)}
+.callout.solo .callout-title{color:var(--green2)}
+.code-block{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin:14px 0}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.code-lang{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:0.06em}
+.copy-btn{background:var(--bg4);border:1px solid var(--border2);color:var(--text3);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;transition:all var(--transition)}
+.copy-btn:hover{border-color:var(--blue);color:var(--blue2)}
+.copy-btn.copied{border-color:var(--green);color:var(--green2)}
+.code-block pre{padding:16px;overflow-x:auto;font-family:'DM Mono',monospace;font-size:13px;line-height:1.65;color:var(--text2);white-space:pre-wrap;word-break:break-word}
+.checklist{list-style:none;display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.check-item{display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;transition:all var(--transition);user-select:none}
+.check-item:hover{border-color:var(--border2);background:var(--bg4)}
+.check-item.checked{opacity:0.65;background:var(--green-dim);border-color:rgba(16,185,129,0.2)}
+.check-box{width:18px;height:18px;border-radius:5px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all var(--transition)}
+.check-item.checked .check-box{background:var(--green);border-color:var(--green)}
+.check-box::after{content:''}
+.check-item.checked .check-box::after{content:'✓';color:#fff;font-size:11px;font-weight:700}
+.check-text{font-size:14px;line-height:1.5}
+.check-item.checked .check-text{text-decoration:line-through;color:var(--text3)}
+.check-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.step-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin:14px 0}
+.step-list li{display:flex;gap:14px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:14px}
+.step-list li .num{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue2);background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.data-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+.data-table th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);background:var(--bg3);border:1px solid var(--border)}
+.data-table td{padding:10px 14px;border:1px solid var(--border);vertical-align:top;line-height:1.5}
+.data-table tr:hover td{background:var(--bg3)}
+.data-table td:first-child{font-weight:500;color:var(--text)}
+.data-table td:not(:first-child){color:var(--text2)}
+.td-cost{color:var(--amber)!important;font-family:'DM Mono',monospace}
+.td-green{color:var(--green)!important}
+.td-red{color:var(--red)!important}
+.td-blue{color:var(--blue2)!important}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin:16px 0}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.card-icon{font-size:24px;margin-bottom:10px}
+.card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px}
+.card-body{font-size:13px;color:var(--text2);line-height:1.55}
+.timeline{position:relative;padding-left:32px;margin:16px 0}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border2);border-radius:2px}
+.tl-item{position:relative;margin-bottom:20px}
+.tl-dot{position:absolute;left:-32px;top:4px;width:18px;height:18px;border-radius:50%;background:var(--bg2);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center}
+.tl-dot.done{border-color:var(--green);background:var(--green-dim)}
+.tl-dot.active{border-color:var(--blue);background:var(--blue-dim);box-shadow:0 0 10px var(--blue)}
+.tl-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--border2)}
+.tl-dot.done::after{background:var(--green)}
+.tl-dot.active::after{background:var(--blue)}
+.tl-week{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:3px}
+.tl-title{font-size:14px;font-weight:600}
+.tl-desc{font-size:13px;color:var(--text2);margin-top:3px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center}
+.stat-number{font-family:'Syne',sans-serif;font-size:30px;font-weight:800}
+.stat-label{font-size:11px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:0.08em}
+.stat-card.blue .stat-number{color:var(--blue2)}
+.stat-card.green .stat-number{color:var(--green2)}
+.stat-card.amber .stat-number{color:var(--amber)}
+.stat-card.purple .stat-number{color:var(--purple)}
+.phase-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0}
+.phase-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all var(--transition)}
+.phase-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+.phase-card.phase-current{border-color:var(--blue);box-shadow:0 0 0 1px rgba(59,130,246,0.2)}
+.pc-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--text4);margin-bottom:6px}
+.pc-title{font-size:13px;font-weight:600;margin-bottom:8px}
+.pc-bar{height:4px;background:var(--bg4);border-radius:10px;overflow:hidden}
+.pc-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width 0.5s ease}
+.pc-pct{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:5px}
+.mantra{background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(16,185,129,0.06));border:1px solid rgba(59,130,246,0.15);border-radius:14px;padding:20px 24px;margin:20px 0;text-align:center}
+.mantra-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--blue2);letter-spacing:-0.2px}
+.mantra-sub{font-size:12px;color:var(--text3);margin-top:6px}
+.sub-section{margin:24px 0 16px}
+.sub-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:14px;color:var(--text)}
+.divider{height:1px;background:var(--border);margin:28px 0}
+.table-wrap{overflow-x:auto;border-radius:var(--radius)}
+.intro-banner{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(16,185,129,0.06));border:1px solid rgba(59,130,246,0.2);border-radius:14px;padding:28px 32px;margin-bottom:32px}
+.ib-phase{font-size:12px;color:var(--blue2);font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.ib-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-0.5px;margin-bottom:10px}
+.ib-body{font-size:15px;color:var(--text2);line-height:1.65}
+.highlight{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius);padding:14px 18px;margin:12px 0}
+.highlight p{font-size:14px;color:var(--text2);line-height:1.6}
+.highlight p strong{color:var(--blue2)}
+.video-note{background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:12px;margin:12px 0}
+.video-note .play{font-size:20px}
+.video-note .vn-text{font-size:13px;color:var(--text2)}
+.video-note .vn-query{font-family:'DM Mono',monospace;font-size:12px;color:var(--cyan);margin-top:2px}
+.rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.rev-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.rev-month{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.rev-amount{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green2)}
+.rev-detail{font-size:12px;color:var(--text3);margin-top:4px}
+.budget-total{display:flex;justify-content:space-between;align-items:center;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 20px;margin:14px 0}
+.bt-label{font-size:13px;color:var(--text2)}
+.bt-amount{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--amber)}
+#toast{position:fixed;bottom:28px;right:28px;z-index:9998;background:var(--bg3);border:1px solid var(--green);border-radius:var(--radius);padding:12px 20px;font-size:13px;color:var(--green2);display:flex;align-items:center;gap:8px;transform:translateY(80px);opacity:0;transition:all 0.3s ease;box-shadow:0 8px 24px rgba(0,0,0,0.4);pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+.glossary-item{padding:12px 0;border-bottom:1px solid var(--border)}
+.glossary-term{font-weight:700;color:var(--blue2);font-size:14px;margin-bottom:4px}
+.glossary-def{font-size:13px;color:var(--text2);line-height:1.55}
+@media(max-width:900px){#sidebar{transform:translateX(-280px);transition:transform 0.3s ease}#sidebar.open{transform:translateX(0);box-shadow:10px 0 40px rgba(0,0,0,0.6)}#main{margin-left:0}.content{padding:24px 20px 80px}.page-header{padding:12px 20px}.stats-row{grid-template-columns:repeat(2,1fr)}.hamburger{display:flex!important}}
+.hamburger{display:none;align-items:center;justify-content:center;width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;flex-direction:column;gap:4px;flex-shrink:0}
+.hamburger span{width:16px;height:2px;background:var(--text2);border-radius:2px}
+.overlay{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,0.6)}
+.overlay.show{display:block}
+code{font-family:'DM Mono',monospace;color:var(--green2);background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:0.9em}
+</style>
+</head>
+<body>
+<div id="pw-screen">
+  <div class="pw-grid"></div>
+  <div class="pw-card" id="pw-card">
+    <div class="pw-logo">👁</div>
+    <div class="pw-title">Verifeye Founder OS</div>
+    <div class="pw-sub">The Complete Textbook — Private</div>
+    <label class="pw-label" for="pw-input">Access Password</label>
+    <input class="pw-input" id="pw-input" type="password" placeholder="Enter password..." autocomplete="off" autofocus>
+    <button class="pw-btn" onclick="checkPassword()">Enter →</button>
+    <div class="pw-error" id="pw-error"></div>
+  </div>
+  <div class="pw-confidential">CONFIDENTIAL · ADAM'S PROJECT 988 · v2.0 · 2026</div>
+</div>
+
+<div id="app">
+  <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
+  <nav id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-row">
+        <div class="sidebar-logo-icon">👁</div>
+        <div class="sidebar-brand">VERIFEYE</div>
+      </div>
+      <div class="sidebar-tagline">Founder OS · The Complete Textbook</div>
+    </div>
+    <div class="global-progress">
+      <div class="gp-label"><span class="gp-text">Overall Progress</span><span class="gp-pct" id="global-pct">0%</span></div>
+      <div class="gp-bar"><div class="gp-fill" id="global-bar" style="width:0%"></div></div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">⌂</span><span class="nav-label">Dashboard</span></div>
+      <div class="nav-item" onclick="showPage('roadmap')"><span class="nav-icon">🗓</span><span class="nav-label">21-Week Roadmap</span></div>
+      <div class="nav-item" onclick="showPage('budget')"><span class="nav-icon">💰</span><span class="nav-label">Budget Tracker</span></div>
+      <div class="nav-item" onclick="showPage('glossary')"><span class="nav-icon">📖</span><span class="nav-label">Tech Glossary</span></div>
+      <div class="nav-section-title">The 13 Phases</div>
+      <div class="nav-item" onclick="showPage('phase0')"><span class="nav-icon">🧠</span><span class="nav-label">Phase 0 — Mindset</span><span class="nav-badge"><span class="badge-pct" id="pct-0">0%</span><span class="badge-dot" id="dot-0"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase1')"><span class="nav-icon">🤖</span><span class="nav-label">Phase 1 — Claude Code</span><span class="nav-badge"><span class="badge-pct" id="pct-1">0%</span><span class="badge-dot" id="dot-1"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase2')"><span class="nav-icon">⚖️</span><span class="nav-label">Phase 2 — Legal</span><span class="nav-badge"><span class="badge-pct" id="pct-2">0%</span><span class="badge-dot" id="dot-2"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase3')"><span class="nav-icon">🔧</span><span class="nav-label">Phase 3 — Accounts</span><span class="nav-badge"><span class="badge-pct" id="pct-3">0%</span><span class="badge-dot" id="dot-3"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase4')"><span class="nav-icon">🌐</span><span class="nav-label">Phase 4 — Website</span><span class="nav-badge"><span class="badge-pct" id="pct-4">0%</span><span class="badge-dot" id="dot-4"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase5')"><span class="nav-icon">🗄️</span><span class="nav-label">Phase 5 — Database</span><span class="nav-badge"><span class="badge-pct" id="pct-5">0%</span><span class="badge-dot" id="dot-5"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase6')"><span class="nav-icon">⚡</span><span class="nav-label">Phase 6 — API</span><span class="nav-badge"><span class="badge-pct" id="pct-6">0%</span><span class="badge-dot" id="dot-6"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase7')"><span class="nav-icon">🔍</span><span class="nav-label">Phase 7 — Detection</span><span class="nav-badge"><span class="badge-pct" id="pct-7">0%</span><span class="badge-dot" id="dot-7"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase8')"><span class="nav-icon">🎨</span><span class="nav-label">Phase 8 — Web App</span><span class="nav-badge"><span class="badge-pct" id="pct-8">0%</span><span class="badge-dot" id="dot-8"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase9')"><span class="nav-icon">💳</span><span class="nav-label">Phase 9 — Payments</span><span class="nav-badge"><span class="badge-pct" id="pct-9">0%</span><span class="badge-dot" id="dot-9"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase10')"><span class="nav-icon">📱</span><span class="nav-label">Phase 10 — Mobile</span><span class="nav-badge"><span class="badge-pct" id="pct-10">0%</span><span class="badge-dot" id="dot-10"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase11')"><span class="nav-icon">🧪</span><span class="nav-label">Phase 11 — Testing</span><span class="nav-badge"><span class="badge-pct" id="pct-11">0%</span><span class="badge-dot" id="dot-11"></span></span></div>
+      <div class="nav-item" onclick="showPage('phase12')"><span class="nav-icon">🚀</span><span class="nav-label">Phase 12 — Launch</span><span class="nav-badge"><span class="badge-pct" id="pct-12">0%</span><span class="badge-dot" id="dot-12"></span></span></div>
+    </div>
+    <div class="sidebar-footer">CONFIDENTIAL · Adam's Project 988 · v2.0</div>
+  </nav>
+
+  <div id="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><div class="page-title">Dashboard</div></div>
+        <div class="ph-right"><span style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">Adam's Project 988</span></div>
+      </div>
+      <div class="content">
+        <div class="mantra"><div class="mantra-text" id="mantra-text">"Verifeye does not detect AI. Verifeye certifies reality."</div><div class="mantra-sub">Core identity — the mission in one sentence</div></div>
+        <div class="stats-row">
+          <div class="stat-card blue"><div class="stat-number" id="stat-total">0</div><div class="stat-label">Tasks Complete</div></div>
+          <div class="stat-card green"><div class="stat-number" id="stat-pct">0%</div><div class="stat-label">Overall Progress</div></div>
+          <div class="stat-card amber"><div class="stat-number">21</div><div class="stat-label">Weeks to Launch</div></div>
+          <div class="stat-card purple"><div class="stat-number">13</div><div class="stat-label">Build Phases</div></div>
+        </div>
+        <div class="sub-title">Phase Progress — Click Any to Jump In</div>
+        <div class="phase-grid" id="phase-grid"></div>
+        <div class="divider"></div>
+        <div class="sub-title">What You Are Building</div>
+        <div class="cards-grid">
+          <div class="card"><div class="card-icon">🌐</div><div class="card-title">The HTTPS of Content</div><div class="card-body">Just as HTTPS gave the internet a universal padlock for security, the Verifeye Seal will be the universal mark for authenticity. Anyone can verify a Seal — forever.</div></div>
+          <div class="card"><div class="card-icon">🔏</div><div class="card-title">Not Detection — Certification</div><div class="card-body">Every existing tool flags AI content and stops. Verifeye goes further: every scan produces a permanent, cryptographically-signed certificate (a Seal) logged in a public Trust Registry.</div></div>
+          <div class="card"><div class="card-icon">👁</div><div class="card-title">The Trust Registry</div><div class="card-body">A public database of every Seal ever issued. Anyone can visit verify.verifeye.io, type a Seal Key, and see the full certificate — even years later, even without an account.</div></div>
+          <div class="card"><div class="card-icon">🛡️</div><div class="card-title">Two Products</div><div class="card-body"><strong style="color:var(--blue2)">Personal $14.99/mo:</strong> Call Shield, Screen Scan, Family Protection.<br><strong style="color:var(--green2)">Newsroom $3,500/mo:</strong> Editorial workflows, bulk scan, white-label Seals.</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="sub-title">The Market Opportunity</div>
+        <div class="stats-row">
+          <div class="stat-card blue"><div class="stat-number">90%</div><div class="stat-label">Online content AI-generated by 2026</div></div>
+          <div class="stat-card" style="border-color:var(--red-dim)"><div class="stat-number" style="color:var(--red)">$40B</div><div class="stat-label">Projected AI fraud losses by 2027</div></div>
+          <div class="stat-card amber"><div class="stat-number">1 in 4</div><div class="stat-label">Adults targeted by AI voice scams</div></div>
+          <div class="stat-card purple"><div class="stat-number">0.1%</div><div class="stat-label">Humans who can detect all AI media</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 0 -->
+    <div class="page" id="page-phase0">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 0</span><div class="page-title">The Solo Founder Mindset</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-0" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-0">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 0 — Before You Touch Anything</div><div class="ib-title">The Solo Founder Mindset</div><div class="ib-body">Building a fully functioning web app and mobile app with no coding experience, alone, is one of the hardest things a person can attempt. You need to know this not to discourage you — but so that when it is hard (and it will be), you know that is <strong>normal, expected, and survivable.</strong></div></div>
+        <div class="callout explain"><div class="callout-header"><span class="callout-icon">🧠</span><span class="callout-title">What You Are Actually Doing</span></div><div class="callout-body">You are both founder AND developer. In 2026, Claude Code means <strong>60–70% of code is generated from plain English descriptions.</strong> The remaining 30–40% requires you to read and make corrections — skills you will build as you go.</div></div>
+        <div class="sub-section"><div class="sub-title">Your 6 Mental Rules</div>
+        <div class="callout tip"><div class="callout-header"><span class="callout-icon">1️⃣</span><span class="callout-title">Rule 1 — One Phase at a Time</span></div><div class="callout-body">Do not think about Phase 7 when you are in Phase 2. Every phase is the only phase. <strong>Overwhelm is what happens when you look too far ahead.</strong> When this guide feels huge, just do the very next checkbox.</div></div>
+        <div class="callout tip"><div class="callout-header"><span class="callout-icon">2️⃣</span><span class="callout-title">Rule 2 — Google Every Error</span></div><div class="callout-body">Every error message you will ever see has been seen by thousands before you. <strong>Copy the exact error into Google.</strong> The answer is almost always in the first 3 results.</div></div>
+        <div class="callout tip"><div class="callout-header"><span class="callout-icon">3️⃣</span><span class="callout-title">Rule 3 — Claude Code Is Your Developer</span></div><div class="callout-body">You describe what you want in plain English. Claude Code writes it, runs it, fixes errors. You review and direct. <strong>This is the entire workflow.</strong></div></div>
+        <div class="callout tip"><div class="callout-header"><span class="callout-icon">4️⃣</span><span class="callout-title">Rule 4 — Done Beats Perfect</span></div><div class="callout-body">A working product with rough edges is <strong>infinitely more valuable</strong> than a perfect product that doesn't exist. Ship first, improve second.</div></div>
+        <div class="callout warning"><div class="callout-header"><span class="callout-icon">5️⃣</span><span class="callout-title">Rule 5 — 45-Minute Rule</span></div><div class="callout-body">If stuck for more than <strong>45 minutes, start a new approach.</strong> Set a timer. This is not failure — it is efficient problem-solving.</div></div>
+        <div class="callout tip"><div class="callout-header"><span class="callout-icon">6️⃣</span><span class="callout-title">Rule 6 — Rest Is Productive</span></div><div class="callout-body">One <strong>focused 4-hour session beats one exhausted 8-hour session</strong> every time. Protect your sleep.</div></div></div>
+        <div class="sub-section"><div class="sub-title">The 21-Week Timeline</div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot active"></div><div class="tl-week">WEEKS 1–2</div><div class="tl-title">Foundation (Phases 0–3)</div><div class="tl-desc">Mindset. Claude Code mastered. Legal done. All accounts set up.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 3–4</div><div class="tl-title">Web Presence (Phase 4)</div><div class="tl-desc">verifeye.io live. Waitlist collecting emails.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 5–8</div><div class="tl-title">Core Backend (Phases 5–7)</div><div class="tl-desc">Database, API, real detection engine. Upload a file, get a real verdict.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 9–12</div><div class="tl-title">Web App + Payments (Phases 8–9)</div><div class="tl-desc">Interface polished. Billing working. First revenue possible.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 13–18</div><div class="tl-title">Mobile App (Phase 10)</div><div class="tl-desc">Expo project. Core screens. TestFlight. This is the hardest phase — budget extra time.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 19–20</div><div class="tl-title">Testing (Phase 11)</div><div class="tl-desc">Full tests. Performance. Legal. Launch prep.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEK 21</div><div class="tl-title">🚀 Launch (Phase 12)</div><div class="tl-desc">Product Hunt. Email blast. First paying customer.</div></div>
+        </div></div>
+        <div class="sub-section"><div class="sub-title">Phase 0 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p0_1')"><div class="check-box"></div><div><div class="check-text">I have read and accepted the realistic timeline (21 weeks, 3–4 hrs/day)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p0_2')"><div class="check-box"></div><div><div class="check-text">I have set up a dedicated workspace with no interruptions</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p0_3')"><div class="check-box"></div><div><div class="check-text">I have scheduled daily 3–4 hour Verifeye blocks in my calendar</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p0_4')"><div class="check-box"></div><div><div class="check-text">I have written my personal "why" — why I am building Verifeye</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p0_5')"><div class="check-box"></div><div><div class="check-text">I understand Claude Code writes the code — my job is to direct and review</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p0_6')"><div class="check-box"></div><div><div class="check-text">I have bookmarked this dashboard and will update progress daily</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 1 -->
+    <div class="page" id="page-phase1">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 1</span><div class="page-title">Claude Code Setup</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-1" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-1">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 1 — Your Most Important Tool</div><div class="ib-title">Setting Up Claude Code</div><div class="ib-body">Before anything else — spend two days getting comfortable with Claude Code. <strong>This is why building solo is possible.</strong> You describe. It builds.</div></div>
+        <div class="callout explain"><div class="callout-header"><span class="callout-icon">🧠</span><span class="callout-title">What Is Claude Code?</span></div><div class="callout-body">You run it in Terminal. You describe what you want in plain English. Claude Code <strong>writes the code, creates files, runs commands, reads errors, and fixes them — all by itself.</strong> This is fundamentally different from using Claude.ai in a browser.</div></div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">1.1</div><div class="step-info"><div class="step-title-row"><div class="step-title">Install Node.js and Claude Code</div><span class="step-time">⏱ 30 min</span></div></div></div>
+          <div class="callout explain"><div class="callout-header"><span class="callout-icon">🧠</span><span class="callout-title">What Is the Terminal?</span></div><div class="callout-body">A text window where you type commands instead of clicking. <strong>Mac:</strong> Cmd+Space → "Terminal". <strong>Windows:</strong> Win+R → "cmd".</div></div>
+          <ol class="step-list">
+            <li><span class="num">1</span><div>Go to <strong style="color:var(--blue2)">https://nodejs.org</strong> → click LTS → download and install.</div></li>
+            <li><span class="num">2</span><div>Open Terminal: type <code>node --version</code> → should show v20.x.x</div></li>
+          </ol>
+          <div class="code-block"><div class="code-header"><span class="code-lang">terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>npm install -g @anthropic-ai/claude-code</pre></div>
+          <ol class="step-list">
+            <li><span class="num">3</span><div>Paste above into Terminal → press Enter → wait for download</div></li>
+            <li><span class="num">4</span><div>Type <code>claude</code> → press Enter → log in with Anthropic account</div></li>
+          </ol>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">1.2</div><div class="step-info"><div class="step-title-row"><div class="step-title">The 3 Superpowers of Claude Code</div></div></div></div>
+          <div class="cards-grid">
+            <div class="card"><div class="card-icon">📂</div><div class="card-title">Reads Your Whole Project</div><div class="card-body">Claude Code sees every file. When you say "add a loading spinner to the scan page", it reads your scan page first, then writes the change.</div></div>
+            <div class="card"><div class="card-icon">▶️</div><div class="card-title">Runs Commands</div><div class="card-body">Needs to install a package? It runs the Terminal command itself and reads the output. You never copy commands.</div></div>
+            <div class="card"><div class="card-icon">🔄</div><div class="card-title">Fixes Its Own Errors</div><div class="card-body">When code doesn't work, Claude Code reads the error, understands what went wrong, and fixes it — often without you asking.</div></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">1.3</div><div class="step-info"><div class="step-title-row"><div class="step-title">Install VS Code</div><span class="step-time">⏱ 30 min</span></div></div></div>
+          <ol class="step-list">
+            <li><span class="num">1</span><div>Go to <strong style="color:var(--blue2)">https://code.visualstudio.com</strong> → download for your OS → install.</div></li>
+            <li><span class="num">2</span><div>Extensions icon → install: <strong>ESLint</strong>, <strong>Prettier</strong></div></li>
+          </ol>
+          <div class="callout learn"><div class="callout-header"><span class="callout-icon">📚</span><span class="callout-title">Practice Exercise — Do This Before Moving On</span></div><div class="callout-body">Create a folder "test-project" on Desktop. Open Terminal: <code>cd ~/Desktop/test-project</code> → type <code>claude</code>. Ask it to create an HTML page with a click counter. This is the exact workflow for the whole project.</div></div>
+        </div>
+        <div class="sub-section"><div class="sub-title">Phase 1 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p1_1')"><div class="check-box"></div><div><div class="check-text">Node.js installed — <code>node --version</code> shows v20+</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p1_2')"><div class="check-box"></div><div><div class="check-text">Claude Code installed with npm</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p1_3')"><div class="check-box"></div><div><div class="check-text">Logged into Claude Code with Anthropic account</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p1_4')"><div class="check-box"></div><div><div class="check-text">VS Code installed with ESLint and Prettier</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p1_5')"><div class="check-box"></div><div><div class="check-text">Practice exercise done — built test HTML project with Claude Code</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p1_6')"><div class="check-box"></div><div><div class="check-text">Read the 3 Claude Code superpowers</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p1_7')"><div class="check-box"></div><div><div class="check-text">Git installed and configured with your name/email</div><div class="check-sub">Mac: brew install git | Windows: git-scm.com</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="page" id="page-phase2">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 2</span><div class="page-title">The Legal Foundation</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-2" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-2">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 2 — Before Any Code</div><div class="ib-title">The Legal Foundation</div><div class="ib-body">Complete every step here before writing product code. At investor due diligence, every one of these documents will be audited.</div></div>
+        <div class="callout critical"><div class="callout-header"><span class="callout-icon">🔴</span><span class="callout-title">Order Matters</span></div><div class="callout-body">Trademark first. Then incorporate. Then bank. Then Israeli subsidiary. Do not reverse this order.</div></div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">2.1</div><div class="step-info"><div class="step-title-row"><div class="step-title">Incorporate in Delaware — Stripe Atlas</div><span class="step-time">⏱ 2 hours</span></div></div></div>
+          <div class="callout explain"><div class="callout-header"><span class="callout-icon">🧠</span><span class="callout-title">Why Delaware?</span></div><div class="callout-body">Over 60% of Fortune 500 companies are incorporated in Delaware. It's what investors expect. It's not about taxes — it's about credibility.</div></div>
+          <ol class="step-list">
+            <li><span class="num">1</span><div>Go to <strong style="color:var(--blue2)">https://atlas.stripe.com</strong> → Get started</div></li>
+            <li><span class="num">2</span><div>Company name: <strong>VERIFEYE INC.</strong> | Type: Delaware C-Corp | Shares: 10,000,000 at $0.0001</div></li>
+            <li><span class="num">3</span><div>Pay $500. Documents arrive in 24–48 hours: Certificate of Incorporation, Bylaws, EIN</div></li>
+            <li><span class="num">4</span><div>Save everything to Google Drive: "Verifeye — Legal" folder</div></li>
+          </ol>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">2.2</div><div class="step-info"><div class="step-title-row"><div class="step-title">Open US Bank — Mercury</div><span class="step-time">⏱ 30 min + 2–5 days</span></div></div></div>
+          <ol class="step-list">
+            <li><span class="num">1</span><div>Go to <strong style="color:var(--blue2)">https://mercury.com</strong> → Apply → enter company details + EIN</div></li>
+            <li><span class="num">2</span><div>Upload Certificate of Incorporation from Stripe Atlas</div></li>
+            <li><span class="num">3</span><div>Approval: 2–5 days. Save account + routing numbers to 1Password.</div></li>
+          </ol>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">2.3</div><div class="step-info"><div class="step-title-row"><div class="step-title">File Trademark Applications</div><span class="step-time">⏱ 2–4 hours</span></div></div></div>
+          <div class="callout explain"><div class="callout-header"><span class="callout-icon">🧠</span><span class="callout-title">Paris Convention Strategy</span></div><div class="callout-body">File in Israel FIRST to get a priority date. Under the Paris Convention, you then have <strong>6 months</strong> to file in EU, USA, and UK — all sharing the same priority date.</div></div>
+          <div class="table-wrap"><table class="data-table"><tr><th>Country</th><th>Website</th><th>Cost</th><th>Notes</th></tr><tr><td>🇮🇱 Israel — File First</td><td>ilpo.gov.il</td><td class="td-cost">~3,200 NIS ($870)</td><td>Classes 42 + 45. Sets your priority date.</td></tr><tr><td>🇪🇺 EU</td><td>euipo.europa.eu</td><td class="td-cost">~€950</td><td>Covers all 27 EU countries</td></tr><tr><td>🇺🇸 USA</td><td>teas.uspto.gov</td><td class="td-cost">~$650</td><td>Expect Office Action after 3–4 months</td></tr><tr><td>🇬🇧 UK</td><td>gov.uk/intellectual-property</td><td class="td-cost">~£340</td><td>Fastest (~4 months)</td></tr></table></div>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">2.4</div><div class="step-info"><div class="step-title-row"><div class="step-title">Domains + Israeli Subsidiary + Trade Secrets</div></div></div></div>
+          <div class="callout tip"><div class="callout-header"><span class="callout-icon">🌐</span><span class="callout-title">Register Domains on Cloudflare</span></div><div class="callout-body">Go to dash.cloudflare.com → Domain Registration → buy verifeye.io (~$15/year). Enable Privacy Protection. Don't configure DNS yet — that's Phase 4.</div></div>
+          <div class="callout explain"><div class="callout-header"><span class="callout-icon">🧠</span><span class="callout-title">Israeli Subsidiary — Why and How</span></div><div class="callout-body">Hire an Israeli accountant (via StartIsrael.org). Register a חברה בע"מ 100% owned by VERIFEYE INC. Cost: ~3,000–5,000 NIS. Allows you to: pay yourself legally, employ contractors, apply for IIA R&D grants covering 20–50% of dev costs.</div></div>
+          <div class="code-block"><div class="code-header"><span class="code-lang">Trade Secret Policy — sign, date, save to Google Drive</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>VERIFEYE INC. — TRADE SECRET POLICY — [TODAY'S DATE]
+
+Designated CONFIDENTIAL TRADE SECRETS:
+1. Detection signal ensemble weighting methodology
+2. Confidence calibration algorithms
+3. Training dataset composition and curation criteria
+4. False positive reduction techniques
+5. On-device audio model architecture and parameters
+6. Proprietary text analysis signals (burstiness, hedging ratios)
+
+Access restricted to personnel with signed NDA.
+
+Signed: [YOUR NAME], Founder & CEO, Verifeye Inc.</pre></div>
+        </div>
+        <div class="sub-section"><div class="sub-title">Phase 2 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p2_1')"><div class="check-box"></div><div><div class="check-text">Stripe Atlas: Delaware C-Corp submitted ($500)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p2_2')"><div class="check-box"></div><div><div class="check-text">EIN received and saved to Google Drive "Verifeye — Legal"</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p2_3')"><div class="check-box"></div><div><div class="check-text">Mercury bank account application submitted</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p2_4')"><div class="check-box"></div><div><div class="check-text">verifeye.io domain registered on Cloudflare (~$15/yr)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p2_5')"><div class="check-box"></div><div><div class="check-text">Israel trademark filed (Classes 42 + 45) — ~3,200 NIS</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p2_6')"><div class="check-box"></div><div><div class="check-text">5-month calendar reminder set for EU/USA/UK filings</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p2_7')"><div class="check-box"></div><div><div class="check-text">Israeli accountant hired for subsidiary registration</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p2_8')"><div class="check-box"></div><div><div class="check-text">Trade Secret Policy written, signed, dated</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p2_9')"><div class="check-box"></div><div><div class="check-text">DocuSign account set up with NDA template</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p2_10')"><div class="check-box"></div><div><div class="check-text">Patent attorney contacted for 5 provisional applications</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="page" id="page-phase3">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 3</span><div class="page-title">Setting Up Every Account</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-3" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-3">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 3 — Infrastructure</div><div class="ib-title">All Accounts and Services</div><div class="ib-body">Create every account the product needs. By end of Phase 3: credentials for every service, everything in 1Password, and a complete .env.local template ready to fill.</div></div>
+        <div class="callout tip"><div class="callout-header"><span class="callout-icon">💡</span><span class="callout-title">Install 1Password First</span></div><div class="callout-body">1password.com ($3/month). Every API key, password, and secret goes into 1Password immediately. You'll have 20+ credentials.</div></div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">3.1</div><div class="step-info"><div class="step-title-row"><div class="step-title">Core Development Services</div></div></div></div>
+          <div class="table-wrap"><table class="data-table"><tr><th>Service</th><th>What It Does</th><th>URL</th><th>Cost</th></tr><tr><td>GitHub</td><td>Code storage and version history</td><td>github.com</td><td class="td-cost">Free</td></tr><tr><td>Vercel</td><td>Hosts your website, auto-deploys from GitHub</td><td>vercel.com</td><td class="td-cost">Free → $20/mo</td></tr><tr><td>Railway</td><td>Hosts your API server backend</td><td>railway.app</td><td class="td-cost">$5/mo</td></tr><tr><td>Supabase</td><td>PostgreSQL database with dashboard</td><td>supabase.com</td><td class="td-cost">Free → $25/mo</td></tr><tr><td>Clerk</td><td>User login, signup, sessions</td><td>clerk.com</td><td class="td-cost">Free → $25/mo</td></tr><tr><td>Stripe</td><td>Payments and subscriptions</td><td>stripe.com</td><td class="td-cost">2.9% + 30¢</td></tr></table></div>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">3.2</div><div class="step-info"><div class="step-title-row"><div class="step-title">Detection API Accounts</div></div></div></div>
+          <div class="table-wrap"><table class="data-table"><tr><th>Provider</th><th>Best For</th><th>URL</th><th>Cost</th></tr><tr><td>Hive Moderation</td><td>Images — Midjourney, DALL·E, SD</td><td>thehive.ai</td><td class="td-cost">~$3/1,000 scans</td></tr><tr><td>Originality.ai</td><td>Text — best AI text detector</td><td>originality.ai</td><td class="td-cost">~$0.01/100 words</td></tr><tr><td>Sightengine</td><td>Video frames — deepfake detection</td><td>sightengine.com</td><td class="td-cost">$29/mo starter</td></tr><tr><td>Reality Defender</td><td>Backup image/video detection</td><td>realitydefender.com</td><td class="td-cost">Free tier: 50/mo</td></tr></table></div>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">3.3</div><div class="step-info"><div class="step-title-row"><div class="step-title">Complete .env.local Template</div></div></div></div>
+          <div class="code-block"><div class="code-header"><span class="code-lang">.env.local — fill in as you complete each phase</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre># AUTHENTICATION (Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/app/dashboard
+
+# DATABASE (Supabase)
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+# PAYMENTS (Stripe)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# DETECTION APIs
+HIVE_API_KEY=...
+ORIGINALITY_API_KEY=...
+SIGHTENGINE_API_USER=...
+SIGHTENGINE_API_SECRET=...
+
+# VERIFEYE SECRETS (generate at: generate-secret.vercel.app/32)
+PLATFORM_SALT=...
+SEAL_SIGNING_SECRET=...
+
+# CONFIG
+NEXT_PUBLIC_APP_URL=http://localhost:3000</pre></div>
+        </div>
+        <div class="sub-section"><div class="sub-title">Phase 3 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p3_1')"><div class="check-box"></div><div><div class="check-text">1Password installed</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_2')"><div class="check-box"></div><div><div class="check-text">GitHub + private "verifeye-app" repo created</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_3')"><div class="check-box"></div><div><div class="check-text">Vercel connected to GitHub</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_4')"><div class="check-box"></div><div><div class="check-text">Railway starter project created</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_5')"><div class="check-box"></div><div><div class="check-text">Supabase project created — password in 1Password</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_6')"><div class="check-box"></div><div><div class="check-text">Clerk application created — keys saved</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_7')"><div class="check-box"></div><div><div class="check-text">Stripe account created (test mode) — keys saved</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_8')"><div class="check-box"></div><div><div class="check-text">Hive, Originality.ai, Sightengine keys saved</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_9')"><div class="check-box"></div><div><div class="check-text">Resend + Cloudflare R2 + PostHog + Sentry accounts created</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_10')"><div class="check-box"></div><div><div class="check-text">PLATFORM_SALT and SEAL_SIGNING_SECRET generated (32 chars each)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_11')"><div class="check-box"></div><div><div class="check-text">.env.local file created with all available keys</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_12')"><div class="check-box"></div><div><div class="check-text">All secrets stored in 1Password — nothing only in a text file</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_13')"><div class="check-box"></div><div><div class="check-text">Reality Defender free account created</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p3_14')"><div class="check-box"></div><div><div class="check-text">.gitignore confirmed: .env.local is listed</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 4 -->
+    <div class="page" id="page-phase4">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 4</span><div class="page-title">Marketing Website</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-4" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-4">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 4 — Web Presence</div><div class="ib-title">verifeye.io — Live in 3 Days</div><div class="ib-body">Get verifeye.io live <strong>before</strong> contacting customers. Use Framer — no code required. Done beats perfect.</div></div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">4.1</div><div class="step-info"><div class="step-title-row"><div class="step-title">Build on Framer</div><span class="step-time">⏱ 3–4 days</span></div></div></div>
+          <div class="table-wrap"><table class="data-table"><tr><th>Section</th><th>Copy to Use</th></tr><tr><td>Hero Headline</td><td>"Verifeye does not detect AI. Verifeye certifies reality."</td></tr><tr><td>Hero Subtitle</td><td>"The world's first permanent AI content authentication platform. Detect any image, video, audio, or text. Issue a certificate anyone can verify, forever."</td></tr><tr><td>Accuracy Stats</td><td>97.3% image · 94.1% video · 91.8% text · 89.4% audio</td></tr><tr><td>How It Works</td><td>1. Upload any content. 2. AI analyses in under 5 seconds. 3. Get a permanent Seal anyone can verify.</td></tr><tr><td>Pricing Preview</td><td>Personal Shield $14.99/mo | Newsroom Pro $3,500/mo → "Join the Waitlist"</td></tr></table></div>
+        </div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">4.2</div><div class="step-info"><div class="step-title-row"><div class="step-title">Waitlist + Domain</div><span class="step-time">⏱ 1 hour</span></div></div></div>
+          <ol class="step-list">
+            <li><span class="num">1</span><div>convertkit.com → free plan → create "Verifeye Waitlist" form → embed in Framer</div></li>
+            <li><span class="num">2</span><div>Write automated welcome email: send immediately on signup</div></li>
+            <li><span class="num">3</span><div>Framer: Site Settings → Custom Domain → enter verifeye.io → add DNS records to Cloudflare → wait 5–30 min</div></li>
+          </ol>
+        </div>
+        <div class="sub-section"><div class="sub-title">Phase 4 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p4_1')"><div class="check-box"></div><div><div class="check-text">Framer account created and site built</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p4_2')"><div class="check-box"></div><div><div class="check-text">verifeye.io domain connected and live</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p4_3')"><div class="check-box"></div><div><div class="check-text">ConvertKit waitlist collecting emails</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p4_4')"><div class="check-box"></div><div><div class="check-text">Welcome email active</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p4_5')"><div class="check-box"></div><div><div class="check-text">Site looks professional on mobile</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p4_6')"><div class="check-box"></div><div><div class="check-text">Sent the URL to 3 people and got feedback</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 5 -->
+    <div class="page" id="page-phase5">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 5</span><div class="page-title">The Database</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-5" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-5">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 5 — Data Storage</div><div class="ib-title">Building Your Database</div><div class="ib-body">The database holds everything permanently: users, scans, Seal certificates, billing. Think of it as a set of spreadsheets that hold millions of records and never lose data.</div></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Create Next.js Project</span></div><div class="callout-body">Open Terminal, navigate to Desktop, type <code>claude</code>, then paste this:</div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create a Next.js 14 project with TypeScript and Tailwind CSS.
+
+Run: npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir
+
+Then install:
+npm install @supabase/supabase-js @clerk/nextjs stripe drizzle-orm
+
+Confirm it runs: npm run dev — should show at localhost:3000</pre></div>
+        <div class="section">
+          <div class="section-header"><div class="step-num">5.1</div><div class="step-info"><div class="step-title-row"><div class="step-title">Create the 4 Database Tables</div><span class="step-time">⏱ 1–2 hours</span></div></div></div>
+          <div class="code-block"><div class="code-header"><span class="code-lang">SQL — paste into Supabase SQL Editor → Run</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>CREATE TABLE organisations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  clerk_user_id TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT,
+  plan TEXT DEFAULT 'free',
+  scans_this_month INT DEFAULT 0,
+  monthly_limit INT DEFAULT 300,
+  stripe_customer_id TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- THE PUBLIC TRUST REGISTRY — rows are PERMANENT, never deleted
+CREATE TABLE seals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  seal_key TEXT UNIQUE NOT NULL,
+  org_id UUID REFERENCES organisations(id),
+  content_type TEXT NOT NULL,
+  verdict TEXT NOT NULL,
+  confidence FLOAT NOT NULL,
+  model_detected TEXT,
+  content_hash TEXT NOT NULL,
+  signals JSONB,
+  certificate TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE scans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id UUID REFERENCES organisations(id),
+  content_type TEXT NOT NULL,
+  verdict TEXT,
+  confidence FLOAT,
+  seal_id UUID REFERENCES seals(id),
+  processing_ms INT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE api_keys (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id UUID REFERENCES organisations(id),
+  key_hash TEXT UNIQUE NOT NULL,
+  name TEXT,
+  last_used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_seals_key ON seals(seal_key);
+CREATE INDEX idx_seals_org ON seals(org_id);
+CREATE INDEX idx_scans_org ON scans(org_id);</pre></div>
+        </div>
+        <div class="sub-section"><div class="sub-title">Phase 5 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p5_1')"><div class="check-box"></div><div><div class="check-text">Next.js 14 project created and running at localhost:3000</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p5_2')"><div class="check-box"></div><div><div class="check-text">All 4 tables created in Supabase (organisations, seals, scans, api_keys)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p5_3')"><div class="check-box"></div><div><div class="check-text">Performance indexes created</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p5_4')"><div class="check-box"></div><div><div class="check-text">Clerk auth middleware set up in middleware.ts</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p5_5')"><div class="check-box"></div><div><div class="check-text">Supabase client created in lib/supabase.ts</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p5_6')"><div class="check-box"></div><div><div class="check-text">.env.local filled with Supabase + Clerk keys</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p5_7')"><div class="check-box"></div><div><div class="check-text">Project pushed to GitHub (initial commit)</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 6 -->
+    <div class="page" id="page-phase6">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 6</span><div class="page-title">The API</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-6" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-6">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 6 — The Brain</div><div class="ib-title">Building the API</div><div class="ib-body">The API receives files, runs detection, creates Seals, and stores results. Everything talks to this API.</div></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — /detect Endpoint</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt — paste this exactly</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create app/api/detect/route.ts — POST endpoint for content analysis.
+
+1. Check Clerk auth — return 401 if not logged in
+2. Parse FormData: file + content_type
+3. For now return MOCK results:
+   - verdict: random AUTHENTIC / AI_GENERATED / UNCERTAIN
+   - confidence: random 60-99
+4. Generate Seal Key: "det_" + 12 random alphanumeric characters
+5. Compute SHA-256 hash of file buffer
+6. Create certificate: { seal_key, verdict, confidence, content_type,
+   content_hash, issued_at, issuer: "Verifeye Inc." }
+7. Sign certificate with HMAC-SHA256 using SEAL_SIGNING_SECRET
+8. Save to Supabase: insert into seals + scans tables
+9. Return: { seal_key, verdict, confidence, certificate }</pre></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Trust Registry Endpoint</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create app/api/registry/[key]/route.ts — PUBLIC GET (no auth needed).
+
+Given a seal_key in URL:
+1. SELECT * FROM seals WHERE seal_key = $1
+2. If not found: return 404
+3. If found: return seal + human_readable verdict explanation
+4. Add CORS headers allowing any origin
+   (this must be publicly accessible from any website)</pre></div>
+        <div class="sub-section"><div class="sub-title">Phase 6 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p6_1')"><div class="check-box"></div><div><div class="check-text">POST /api/detect returns mock results + saves to Supabase</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p6_2')"><div class="check-box"></div><div><div class="check-text">Seal Key generated in format det_xxxxxxxxxxxx</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p6_3')"><div class="check-box"></div><div><div class="check-text">Certificate signed with HMAC-SHA256</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p6_4')"><div class="check-box"></div><div><div class="check-text">GET /api/registry/[key] works with CORS headers</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p6_5')"><div class="check-box"></div><div><div class="check-text">Tested from browser console — seal visible in Supabase</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p6_6')"><div class="check-box"></div><div><div class="check-text">User onboarding: org row created in Supabase on signup</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 7 -->
+    <div class="page" id="page-phase7">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 7</span><div class="page-title">The Detection Engine</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-7" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-7">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 7 — Real Detection</div><div class="ib-title">Replacing Mock Results</div><div class="ib-body">Replace the fake results from Phase 6 with calls to real AI detection services. After this phase, <strong>Verifeye actually works.</strong></div></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Image Detector</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create lib/detection/imageDetector.ts
+
+Export: async function detectImage(fileBuffer: Buffer, filename: string)
+
+1. Call Hive Moderation API:
+   URL: https://api.thehive.ai/api/v2/task/sync
+   Method: POST FormData, Header: Authorization: Token ${HIVE_API_KEY}
+   Extract "yes" class score = 0-1 AI probability
+
+2. Call Reality Defender as backup (fallback if it fails)
+
+3. Weighted average: Hive 0.6, Reality Defender 0.4
+
+4. Verdict thresholds:
+   score > 0.72: AI_GENERATED
+   score < 0.38: AUTHENTIC
+   else: UNCERTAIN
+
+5. Detect AI model from Hive's model-specific classes
+
+6. Return: { verdict, confidence, model_detected, signals }</pre></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Text Detector</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create lib/detection/textDetector.ts
+
+1. Call Originality.ai: POST https://api.originality.ai/api/v1/scan/ai
+   score.ai = 0-1 probability
+
+2. Compute Verifeye proprietary signals:
+   a. BURSTINESS: variance in sentence length. Low = likely AI.
+   b. LIST_RATIO: bullet/numbered items as % of sentences
+   c. HEDGING_RATIO: "it is important", "in conclusion", "it is worth noting"
+
+3. Final: Originality weight 0.7, signals weight 0.3
+
+4. Return: { verdict, confidence, model_detected, signals }</pre></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Video Detector</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create lib/detection/videoDetector.ts
+
+1. Use ffmpeg to extract 1 frame/second (max 30 frames)
+2. Run each frame through detectImage()
+3. aiRatio = aiFrames / totalFrames
+4. Verdict: >0.40 = AI_GENERATED, <0.20 = AUTHENTIC, else UNCERTAIN
+5. Clean up temp files after processing
+6. On Railway add: NIXPACKS_APT_PKGS=ffmpeg</pre></div>
+        <div class="sub-section"><div class="sub-title">Phase 7 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p7_1')"><div class="check-box"></div><div><div class="check-text">imageDetector.ts — Hive + Reality Defender working</div><div class="check-sub">Test: lexica.art image → returns AI_GENERATED</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p7_2')"><div class="check-box"></div><div><div class="check-text">textDetector.ts — Originality.ai + proprietary signals</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p7_3')"><div class="check-box"></div><div><div class="check-text">audioDetector.ts — server-side acoustic analysis</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p7_4')"><div class="check-box"></div><div><div class="check-text">videoDetector.ts — ffmpeg frame sampling</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p7_5')"><div class="check-box"></div><div><div class="check-text">/detect route updated to use real detectors</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p7_6')"><div class="check-box"></div><div><div class="check-text">End-to-end: upload real image → real Hive result in Supabase</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 8 -->
+    <div class="page" id="page-phase8">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 8</span><div class="page-title">The Web App</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-8" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-8">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 8 — What Users See</div><div class="ib-title">Building the Web Interface</div><div class="ib-body">Now you build what users interact with: scan page, dashboard, certificate verifier. This is the front door of Verifeye.</div></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Scan Page</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create app/app/scan/page.tsx — main scan interface.
+
+Dark navy (#050a14), blue (#3b82f6) + green (#10b981) accents.
+
+3 STATES:
+STATE 1 — UPLOAD: drag+drop file zone, 4 tabs (Image/Video/Text/Audio),
+  "Analyse & Certify" button
+STATE 2 — SCANNING: animated progress bar, provider names
+STATE 3 — RESULT: verdict badge (green/red/amber), confidence %,
+  Seal Key with copy button, signal breakdown, "Scan Another" button
+
+Call POST /api/detect on submit. Handle all errors gracefully.</pre></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Dashboard + Verify</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create app/app/dashboard/page.tsx:
+- Welcome + plan badge
+- Stats: total scans, AI detected, authentic, uncertain
+- Usage bar: scans_this_month / monthly_limit
+- Recent scans table (last 10): date, type, verdict, confidence, seal key
+- "New Scan" + "Upgrade" buttons
+
+Create app/verify/[key]/page.tsx (PUBLIC — no login):
+- Fetch from GET /api/registry/[key]
+- Show verdict, confidence, content type, date, issuer
+- "Permanently stored in Verifeye Trust Registry"
+- 404 state with search field
+- Make it look impressive — this gets shared on social media</pre></div>
+        <div class="sub-section"><div class="sub-title">Phase 8 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p8_1')"><div class="check-box"></div><div><div class="check-text">Scan page: all 3 states working (upload, scanning, result)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p8_2')"><div class="check-box"></div><div><div class="check-text">Dashboard with stats, usage bar, recent scans</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p8_3')"><div class="check-box"></div><div><div class="check-text">Public verify page at /verify/[key]</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p8_4')"><div class="check-box"></div><div><div class="check-text">Navigation between all pages</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p8_5')"><div class="check-box"></div><div><div class="check-text">Full flow tested: sign up → scan → result → verify certificate</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p8_6')"><div class="check-box"></div><div><div class="check-text">Mobile responsive — tested on phone</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 9 -->
+    <div class="page" id="page-phase9">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 9</span><div class="page-title">Payments</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-9" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-9">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 9 — Revenue</div><div class="ib-title">Getting Paid with Stripe</div><div class="ib-body">Without payments, you have a project. With payments, you have a business.</div></div>
+        <div class="table-wrap"><table class="data-table"><tr><th>Product</th><th>Price</th><th>Limit</th></tr><tr><td>Personal Shield</td><td class="td-cost">$14.99/mo</td><td>Unlimited</td></tr><tr><td>Family Shield</td><td class="td-cost">$24.99/mo</td><td>Unlimited + 3 accounts</td></tr><tr><td>Newsroom Starter</td><td class="td-cost">$499/mo</td><td>10,000/mo</td></tr><tr><td>Newsroom Pro</td><td class="td-cost">$3,500/mo</td><td>50,000/mo</td></tr></table></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Payments</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create two billing endpoints:
+
+1. app/api/billing/checkout/route.ts — POST
+   Accepts: { priceId: string }
+   Creates Stripe checkout session
+   success_url: /app/dashboard?upgraded=true
+   Returns: { checkoutUrl }
+
+2. app/api/billing/webhook/route.ts — POST (no auth — Stripe calls this)
+   Verify signature with stripe.webhooks.constructEvent()
+   Handle checkout.session.completed:
+     Update organisations plan + monthly_limit
+   Handle customer.subscription.deleted:
+     Set plan = free, monthly_limit = 300
+   Always return { received: true } status 200</pre></div>
+        <div class="callout tip"><div class="callout-header"><span class="callout-icon">💳</span><span class="callout-title">Test Cards</span></div><div class="callout-body"><strong>Success:</strong> 4242 4242 4242 4242 | <strong>Declined:</strong> 4000 0000 0000 0002 | <strong>3DS:</strong> 4000 0025 0000 3155</div></div>
+        <div class="sub-section"><div class="sub-title">Phase 9 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p9_1')"><div class="check-box"></div><div><div class="check-text">4 Stripe products created with correct prices</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p9_2')"><div class="check-box"></div><div><div class="check-text">Price IDs saved to .env.local</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p9_3')"><div class="check-box"></div><div><div class="check-text">Checkout endpoint working</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p9_4')"><div class="check-box"></div><div><div class="check-text">Webhook registered in Stripe Dashboard</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p9_5')"><div class="check-box"></div><div><div class="check-text">Test 4242… → plan updates in Supabase</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p9_6')"><div class="check-box"></div><div><div class="check-text">Usage limit enforcement (429 when over limit)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p9_7')"><div class="check-box"></div><div><div class="check-text">Pricing page built with 4 plan cards</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p9_8')"><div class="check-box"></div><div><div class="check-text">Customer Portal "Manage Billing" button working</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 10 -->
+    <div class="page" id="page-phase10">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 10</span><div class="page-title">The Mobile App</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-10" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-10">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 10 — Hardest Phase</div><div class="ib-title">iOS and Android App</div><div class="ib-body">The most technically challenging phase. Budget 6–10 extra weeks. Be honest with yourself about timing.</div></div>
+        <div class="callout solo"><div class="callout-header"><span class="callout-icon">💪</span><span class="callout-title">Recommended Path for Solo</span></div><div class="callout-body">Do core screens (10.1–10.3) yourself. <strong>Hire for Call Shield</strong> — it requires native Swift/Kotlin. Or: launch web first, get revenue, hire mobile dev for 4–8 weeks.</div></div>
+        <div class="table-wrap"><table class="data-table"><tr><th>Platform</th><th>URL</th><th>Cost</th><th>Wait</th></tr><tr><td>Apple Developer Program</td><td>developer.apple.com</td><td class="td-cost">$99/year</td><td>24–48h approval</td></tr><tr><td>Google Play Console</td><td>play.google.com/console</td><td class="td-cost">$25 one-time</td><td>24h</td></tr></table></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Expo Project</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create a new Expo React Native project for Verifeye mobile.
+
+Run: npx create-expo-app verifeye-mobile --template blank-typescript
+
+Install:
+npx expo install expo-image-picker expo-document-picker expo-camera expo-av
+npm install @clerk/clerk-expo expo-secure-store @supabase/supabase-js
+
+Create screens with Expo Router:
+- (tabs)/scan.tsx — file upload + detection
+- (tabs)/history.tsx — scan history
+- (tabs)/account.tsx — settings
+- verify/[key].tsx — certificate viewer
+- sign-in.tsx / sign-up.tsx — Clerk auth
+
+Match dark navy design from web app.
+Run: npx expo start → scan QR with Expo Go app.</pre></div>
+        <div class="sub-section"><div class="sub-title">Phase 10 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p10_1')"><div class="check-box"></div><div><div class="check-text">Apple Developer Program enrolled ($99/year)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p10_2')"><div class="check-box"></div><div><div class="check-text">Google Play Console created ($25)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p10_3')"><div class="check-box"></div><div><div class="check-text">Expo project running on phone via Expo Go</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p10_4')"><div class="check-box"></div><div><div class="check-text">Clerk auth working in mobile</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p10_5')"><div class="check-box"></div><div><div class="check-text">Scan screen: upload image + detection result</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p10_6')"><div class="check-box"></div><div><div class="check-text">History screen showing past scans</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p10_7')"><div class="check-box"></div><div><div class="check-text">QR scanner for verifying Seals</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p10_8')"><div class="check-box"></div><div><div class="check-text">App submitted to TestFlight</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p10_9')"><div class="check-box"></div><div><div class="check-text">App Store listing + screenshots written</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 11 -->
+    <div class="page" id="page-phase11">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 11</span><div class="page-title">Testing</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-11" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-11">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 11 — Quality</div><div class="ib-title">Testing Before Launch</div><div class="ib-body">A bug during launch is 10× more damaging than a bug during testing. Take 2 weeks here.</div></div>
+        <div class="callout prompt"><div class="callout-header"><span class="callout-icon">🤖</span><span class="callout-title">Claude Code Prompt — Test Suite</span></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Claude Code prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Create a test suite using Jest + @testing-library/react.
+
+Tests for:
+1. API endpoints: /detect (4 content types, auth check, file limits),
+   /registry/[key] (found, not found, CORS), /billing/webhook (signature, plan update)
+2. Detection logic: imageDetector thresholds, textDetector signal calculations
+3. React components: ScanPage (3 states), VerifyPage (found/not found)
+
+npm test to run all. Create TESTING.md with manual test checklist.</pre></div>
+        <div class="sub-section"><div class="sub-title">Phase 11 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p11_1')"><div class="check-box"></div><div><div class="check-text">All API endpoint tests passing</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p11_2')"><div class="check-box"></div><div><div class="check-text">Full end-to-end flow tested manually</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p11_3')"><div class="check-box"></div><div><div class="check-text">PageSpeed score &gt;80 mobile and desktop</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p11_4')"><div class="check-box"></div><div><div class="check-text">Image scan under 8 seconds end-to-end</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p11_5')"><div class="check-box"></div><div><div class="check-text">Privacy Policy live at verifeye.io/privacy</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p11_6')"><div class="check-box"></div><div><div class="check-text">Terms of Service live at verifeye.io/terms</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p11_7')"><div class="check-box"></div><div><div class="check-text">Data deletion endpoint working (GDPR)</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p11_8')"><div class="check-box"></div><div><div class="check-text">Sentry error monitoring active</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p11_9')"><div class="check-box"></div><div><div class="check-text">Vercel deployment confirmed — no timeouts</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p11_10')"><div class="check-box"></div><div><div class="check-text">3 beta newsrooms onboarded with free access</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- PHASE 12 -->
+    <div class="page" id="page-phase12">
+      <div class="page-header">
+        <div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><span class="phase-badge">Phase 12</span><div class="page-title">First Customers</div></div>
+        <div class="ph-right"><div class="phase-progress-bar"><div class="phase-progress-fill" id="bar-12" style="width:0%"></div></div><span class="phase-progress-pct" id="hpct-12">0%</span></div>
+      </div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-phase">Phase 12 — Revenue</div><div class="ib-title">Getting Your First Customers</div><div class="ib-body">You have built a real product. Now get people to pay for it. As a solo founder, you are founder + salesperson + product expert in one conversation. That is an <strong>advantage.</strong></div></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Outreach Email — personalise every [bracket]</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>Subject: AI content verification — free 6-month access for [Outlet Name]
+
+Hi [First Name],
+
+I am building Verifeye — a platform that lets newsrooms verify any image, video,
+audio, or text is AI-generated, then issue a permanent public certificate (a Seal)
+readers can verify themselves.
+
+One AI incident can cost a newsroom $500,000 in credibility damage.
+Verifeye is not detection software — it is reputation insurance.
+
+I am offering [Outlet Name] 6 months free in exchange for 30 minutes of
+feedback per month and one written testimonial.
+
+Could I show you a 15-minute demo this week?
+
+[Your Name], Founder, Verifeye — verifeye.io</pre></div>
+        <div class="sub-title">Revenue Targets</div>
+        <div class="rev-grid">
+          <div class="rev-card"><div class="rev-month">Month 1</div><div class="rev-amount">$3,799</div><div class="rev-detail">1 Newsroom Pro + 20 Personal</div></div>
+          <div class="rev-card"><div class="rev-month">Month 3</div><div class="rev-amount">$15,000</div><div class="rev-detail">3 Newsroom Pro + 100 Personal</div></div>
+          <div class="rev-card"><div class="rev-month">Month 12</div><div class="rev-amount">$85,000</div><div class="rev-detail">10+ Newsroom + 500+ Personal</div></div>
+        </div>
+        <div class="highlight"><p><strong>Key insight:</strong> ONE Newsroom Pro at $3,500/month covers ALL monthly costs (~$500). You need <strong>just 1 paying enterprise customer to be profitable.</strong></p></div>
+        <div class="sub-section"><div class="sub-title">Phase 12 Checklist</div>
+        <ul class="checklist">
+          <li class="check-item" onclick="toggleCheck(this,'p12_1')"><div class="check-box"></div><div><div class="check-text">30 target newsrooms identified in Notion tracker</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p12_2')"><div class="check-box"></div><div><div class="check-text">First 5 personalised outreach emails sent</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p12_3')"><div class="check-box"></div><div><div class="check-text">First demo call booked</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p12_4')"><div class="check-box"></div><div><div class="check-text">3 beta newsrooms onboarded with free access</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p12_5')"><div class="check-box"></div><div><div class="check-text">Twitter/X + LinkedIn accounts created</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p12_6')"><div class="check-box"></div><div><div class="check-text">Founder story published on LinkedIn</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p12_7')"><div class="check-box"></div><div><div class="check-text">Product Hunt launch prepared — 20+ hunter list</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p12_8')"><div class="check-box"></div><div><div class="check-text">Launch email written and scheduled</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p12_9')"><div class="check-box"></div><div><div class="check-text">Hacker News "Show HN" post written</div></div></li>
+          <li class="check-item" onclick="toggleCheck(this,'p12_10')"><div class="check-box"></div><div><div class="check-text">🎉 LAUNCHED — First paid customer acquired</div></div></li>
+        </ul></div>
+      </div>
+    </div>
+
+    <!-- ROADMAP -->
+    <div class="page" id="page-roadmap">
+      <div class="page-header"><div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><div class="page-title">21-Week Roadmap</div></div></div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-title">21 Weeks to Launch</div><div class="ib-body">Week-by-week at 3–4 hours/day. Sequence matters more than exact dates.</div></div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot active"></div><div class="tl-week">WEEKS 1–2</div><div class="tl-title">Foundation (Phases 0–3)</div><div class="tl-desc">Mindset, Claude Code, legal, all accounts, env files.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 3–4</div><div class="tl-title">Web Presence (Phase 4)</div><div class="tl-desc">verifeye.io live, waitlist collecting emails.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 5–6</div><div class="tl-title">Database (Phase 5)</div><div class="tl-desc">Next.js, 4 tables, Clerk auth, push to GitHub.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 6–7</div><div class="tl-title">API (Phase 6)</div><div class="tl-desc">/detect with mock, Trust Registry, certificate signing.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 7–8</div><div class="tl-title">Detection Engine (Phase 7)</div><div class="tl-desc">Real Hive, Originality.ai, audio, video detection.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 9–10</div><div class="tl-title">Web Interface (Phase 8)</div><div class="tl-desc">Scan page, dashboard, verify page. Full user flow.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 11–12</div><div class="tl-title">Payments (Phase 9)</div><div class="tl-desc">Stripe integrated. Revenue-ready.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 13–18</div><div class="tl-title">Mobile App (Phase 10)</div><div class="tl-desc">Expo, core screens, TestFlight.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEKS 19–20</div><div class="tl-title">Testing (Phase 11)</div><div class="tl-desc">Tests, performance, legal, 3 beta newsrooms.</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-week">WEEK 21</div><div class="tl-title">🚀 Launch (Phase 12)</div><div class="tl-desc">Product Hunt. Email blast. First paid customer.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUDGET -->
+    <div class="page" id="page-budget">
+      <div class="page-header"><div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><div class="page-title">Budget Tracker</div></div></div>
+      <div class="content">
+        <div class="stats-row">
+          <div class="stat-card amber"><div class="stat-number">~$11K</div><div class="stat-label">One-Time Costs</div></div>
+          <div class="stat-card blue"><div class="stat-number">~$105</div><div class="stat-label">Monthly (pre-revenue)</div></div>
+          <div class="stat-card green"><div class="stat-number">~$500</div><div class="stat-label">Monthly (at scale)</div></div>
+          <div class="stat-card purple"><div class="stat-number">1 client</div><div class="stat-label">To Break Even</div></div>
+        </div>
+        <div class="sub-title">One-Time Costs</div>
+        <div class="table-wrap"><table class="data-table"><tr><th>Item</th><th>Cost</th><th>When</th></tr><tr><td>Delaware C-Corp (Stripe Atlas)</td><td class="td-cost">$500</td><td>Day 1</td></tr><tr><td>Israeli Subsidiary</td><td class="td-cost">3,000–5,000 NIS</td><td>Week 1</td></tr><tr><td>Israel Trademark (2 classes)</td><td class="td-cost">~3,200 NIS ($870)</td><td>Week 1</td></tr><tr><td>USA Trademark (2 classes)</td><td class="td-cost">~$650</td><td>Within 6 months</td></tr><tr><td>EU Trademark (2 classes)</td><td class="td-cost">~€950</td><td>Within 6 months</td></tr><tr><td>UK Trademark</td><td class="td-cost">~£340</td><td>Within 6 months</td></tr><tr><td>5 Provisional Patents</td><td class="td-cost">$7,500–12,500</td><td>Within 3 months</td></tr><tr><td>Apple Developer Program</td><td class="td-cost">$99/yr</td><td>Phase 10</td></tr><tr><td>Google Play Console</td><td class="td-cost">$25</td><td>Phase 10</td></tr></table></div>
+        <div class="sub-title">Monthly Recurring</div>
+        <div class="table-wrap"><table class="data-table"><tr><th>Service</th><th>Monthly</th></tr><tr><td>Claude Code</td><td class="td-cost">$20</td></tr><tr><td>Railway (API server)</td><td class="td-cost">$5</td></tr><tr><td>Sightengine starter</td><td class="td-cost">$29</td></tr><tr><td>Framer (marketing site)</td><td class="td-cost">$20</td></tr><tr><td>1Password</td><td class="td-cost">$3</td></tr><tr><td>Google Workspace</td><td class="td-cost">$6</td></tr><tr><td>Vercel / Supabase / Clerk</td><td class="td-cost">Free tiers</td></tr></table></div>
+        <div class="budget-total"><div class="bt-label">Total pre-revenue</div><div class="bt-amount">~$83–105/month</div></div>
+        <div class="callout tip"><div class="callout-header"><span class="callout-icon">💡</span><span class="callout-title">Break-Even = 1 Customer</span></div><div class="callout-body">ONE Newsroom Pro at $3,500/month covers ALL costs at scale with a 7× margin. First goal: one enterprise client.</div></div>
+      </div>
+    </div>
+
+    <!-- GLOSSARY -->
+    <div class="page" id="page-glossary">
+      <div class="page-header"><div class="ph-left"><button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button><div class="page-title">Technical Glossary</div></div></div>
+      <div class="content">
+        <div class="intro-banner"><div class="ib-title">Every Technical Term Explained</div><div class="ib-body">Bookmark and return when you encounter something unfamiliar. Don't memorise — just recognise.</div></div>
+        <div class="glossary-item"><div class="glossary-term">API</div><div class="glossary-def">A set of URLs your app calls to do things. POST /api/detect sends a file and gets back a verdict. Like a restaurant menu: you order, the kitchen prepares, returns your food.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Async / Await</div><div class="glossary-def">When code calls an API, it waits. <code>async function</code> = this takes time. <code>await</code> = pause here until result arrives. Without this, your code continues before the response and crashes.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Component (React)</div><div class="glossary-def">A reusable piece of UI. ScanPage, Button, ResultCard are all components. They receive data (props) and return HTML-like code (JSX). The whole app is components nested together.</div></div>
+        <div class="glossary-item"><div class="glossary-term">CORS</div><div class="glossary-def">Security rule controlling which websites can call your API. Your Trust Registry needs CORS headers allowing any website — otherwise browsers block requests from other domains.</div></div>
+        <div class="glossary-item"><div class="glossary-term">DNS</div><div class="glossary-def">Internet's phone book. Translates verifeye.io into an IP address pointing at your server. Cloudflare manages yours. Adding DNS records connects your domain to Vercel, Framer, etc.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Environment Variables</div><div class="glossary-def">Secret config values — API keys, passwords — in .env.local. NEVER uploaded to GitHub. Each environment (laptop, Vercel production) has its own copy with its own values.</div></div>
+        <div class="glossary-item"><div class="glossary-term">FormData</div><div class="glossary-def">How you send file uploads over HTTP. When a user uploads an image, JavaScript creates a FormData object containing the file and POSTs it to your API.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Git</div><div class="glossary-def">Version control — saves complete history of every code change. If something breaks, rewind to a working version. GitHub is where your Git history lives online.</div></div>
+        <div class="glossary-item"><div class="glossary-term">HMAC-SHA256</div><div class="glossary-def">Cryptographic method producing a unique signature for data using a secret key. Your Seal certificates are HMAC-signed — proves they were issued by Verifeye and haven't been tampered with.</div></div>
+        <div class="glossary-item"><div class="glossary-term">JSON</div><div class="glossary-def">Language APIs use to communicate. <code>{"verdict":"AI_GENERATED","confidence":94}</code>. It's just text in a specific format. All languages can read and write it.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Middleware</div><div class="glossary-def">Code that runs before every request. Clerk middleware checks login before allowing /app/dashboard. Not logged in → redirects to /sign-in automatically.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Next.js</div><div class="glossary-def">Framework powering your web app. Combines React (UI) with server functionality (APIs, database). Files in app/ folder automatically become pages and API routes.</div></div>
+        <div class="glossary-item"><div class="glossary-term">npm</div><div class="glossary-def">Installs JavaScript libraries. <code>npm install stripe</code> installs Stripe. <code>npm run dev</code> starts your dev server. All dependencies listed in package.json.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Route Handler</div><div class="glossary-def">Next.js API endpoint. Files named route.ts inside app/api/ become API endpoints. app/api/detect/route.ts = POST /api/detect. Folder structure IS the URL.</div></div>
+        <div class="glossary-item"><div class="glossary-term">SHA-256</div><div class="glossary-def">Converts any data into a unique 64-char hash. Same data always produces same hash. You hash scan files — gives each file a permanent fingerprint without storing the file.</div></div>
+        <div class="glossary-item"><div class="glossary-term">SQL</div><div class="glossary-def">Language for databases. <code>SELECT * FROM seals WHERE seal_key = 'det_xxx'</code>. Reads like English once you know the keywords: SELECT, INSERT, UPDATE, WHERE.</div></div>
+        <div class="glossary-item"><div class="glossary-term">State (React)</div><div class="glossary-def">Data that changes over time in a component. <code>useState</code> creates state variables. When upload state changes to result state, React automatically re-renders the UI.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Stripe Customer Portal</div><div class="glossary-def">A Stripe-hosted page where subscribers manage their billing — update card, cancel, view invoices. One API call creates the link. You never build billing UI yourself.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Supabase</div><div class="glossary-def">Your PostgreSQL database with a visual dashboard. Free tier includes 500MB storage and 2GB bandwidth. Also provides Row Level Security — users can only see their own data.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Tailwind CSS</div><div class="glossary-def">CSS utility classes you add directly to HTML: <code>className="bg-blue-500 text-white rounded-lg p-4"</code>. No separate CSS files. Claude Code writes these automatically.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Terminal</div><div class="glossary-def">Text window where you type commands. Mac: Cmd+Space → "Terminal". Windows: Win+R → "cmd". You use it to run Claude Code, install packages, and start your dev server.</div></div>
+        <div class="glossary-item"><div class="glossary-term">TypeScript</div><div class="glossary-def">JavaScript with type checking. <code>function detect(file: File): Promise&lt;Verdict&gt;</code> — the types catch errors before they happen. Claude Code writes TypeScript automatically.</div></div>
+        <div class="glossary-item"><div class="glossary-term">UUID</div><div class="glossary-def">Universally Unique Identifier — a 36-char random ID like <code>550e8400-e29b-41d4-a716-446655440000</code>. Every row in your database gets one. Zero chance of two being identical.</div></div>
+        <div class="glossary-item"><div class="glossary-term">Vercel</div><div class="glossary-def">Hosts your Next.js app. Connects to GitHub — every push to main branch auto-deploys. Free tier is generous. Production URL: yourapp.vercel.app (later: app.verifeye.io).</div></div>
+        <div class="glossary-item"><div class="glossary-term">Webhook</div><div class="glossary-def">Stripe automatically calling your server when something happens (payment, cancellation). Without webhooks you'd have no way to know money came in. Your /api/billing/webhook handles these.</div></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div id="toast"><span>✓</span><span id="toast-msg">Task complete!</span></div>
+
+<script>
+// === PASSWORD ===
+function checkPassword() {
+  const val = document.getElementById('pw-input').value;
+  if (val === 'AdamsProject988') {
+    document.getElementById('pw-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadState();
+  } else {
+    const card = document.getElementById('pw-card');
+    const err = document.getElementById('pw-error');
+    err.textContent = 'Incorrect password. Try again.';
+    card.classList.remove('pw-shake');
+    void card.offsetWidth;
+    card.classList.add('pw-shake');
+  }
+}
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
+// === NAVIGATION ===
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    if (item.getAttribute('onclick') && item.getAttribute('onclick').includes("'" + id + "'")) {
+      item.classList.add('active');
+    }
+  });
+  window.scrollTo(0, 0);
+  closeSidebar();
+}
+
+// === SIDEBAR ===
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// === PHASE CONFIG ===
+const PHASES = [
+  { id: 0, label: 'Mindset',    total: 6 },
+  { id: 1, label: 'Claude Code',total: 7 },
+  { id: 2, label: 'Legal',      total: 10 },
+  { id: 3, label: 'Accounts',   total: 14 },
+  { id: 4, label: 'Website',    total: 6 },
+  { id: 5, label: 'Database',   total: 7 },
+  { id: 6, label: 'API',        total: 6 },
+  { id: 7, label: 'Detection',  total: 6 },
+  { id: 8, label: 'Web App',    total: 6 },
+  { id: 9, label: 'Payments',   total: 8 },
+  { id: 10, label: 'Mobile',    total: 9 },
+  { id: 11, label: 'Testing',   total: 10 },
+  { id: 12, label: 'Launch',    total: 10 }
+];
+const TOTAL_TASKS = PHASES.reduce((s, p) => s + p.total, 0);
+
+// === STORAGE ===
+let saved = {};
+async function loadState() {
+  try {
+    const r = await window.storage.get('verifeye_checks_v2');
+    if (r && r.value) saved = JSON.parse(r.value);
+  } catch(e) { saved = {}; }
+  applyChecks();
+  updateProgress();
+  buildPhaseGrid();
+  rotateMantras();
+}
+async function saveState() {
+  try { await window.storage.set('verifeye_checks_v2', JSON.stringify(saved)); } catch(e) {}
+}
+
+// === CHECKBOXES ===
+function toggleCheck(el, key) {
+  const isChecked = el.classList.contains('checked');
+  if (isChecked) {
+    el.classList.remove('checked');
+    delete saved[key];
+  } else {
+    el.classList.add('checked');
+    saved[key] = true;
+    showToast('Task marked complete!');
+  }
+  saveState();
+  updateProgress();
+  buildPhaseGrid();
+}
+
+function applyChecks() {
+  document.querySelectorAll('.check-item').forEach(el => {
+    const key = el.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+    if (key && saved[key]) el.classList.add('checked');
+  });
+}
+
+// === PROGRESS ===
+function updateProgress() {
+  let totalDone = 0;
+  PHASES.forEach(p => {
+    let done = 0;
+    for (let i = 1; i <= p.total; i++) {
+      if (saved['p' + p.id + '_' + i]) done++;
+    }
+    const pct = p.total > 0 ? Math.round((done / p.total) * 100) : 0;
+    totalDone += done;
+    const bar = document.getElementById('bar-' + p.id);
+    if (bar) bar.style.width = pct + '%';
+    const hpct = document.getElementById('hpct-' + p.id);
+    if (hpct) hpct.textContent = pct + '%';
+    const pctBadge = document.getElementById('pct-' + p.id);
+    if (pctBadge) pctBadge.textContent = pct + '%';
+    const dot = document.getElementById('dot-' + p.id);
+    if (dot) {
+      dot.className = 'badge-dot';
+      if (pct === 100) dot.classList.add('done');
+      else if (pct > 0) dot.classList.add('active');
+    }
+  });
+  const globalPct = Math.round((totalDone / TOTAL_TASKS) * 100);
+  const gbar = document.getElementById('global-bar');
+  if (gbar) gbar.style.width = globalPct + '%';
+  const gpct = document.getElementById('global-pct');
+  if (gpct) gpct.textContent = globalPct + '%';
+  const stTotal = document.getElementById('stat-total');
+  if (stTotal) stTotal.textContent = totalDone;
+  const stPct = document.getElementById('stat-pct');
+  if (stPct) stPct.textContent = globalPct + '%';
+}
+
+// === PHASE GRID ===
+function buildPhaseGrid() {
+  const grid = document.getElementById('phase-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  PHASES.forEach(p => {
+    let done = 0;
+    for (let i = 1; i <= p.total; i++) {
+      if (saved['p' + p.id + '_' + i]) done++;
+    }
+    const pct = Math.round((done / p.total) * 100);
+    const card = document.createElement('div');
+    card.className = 'phase-card' + (pct > 0 && pct < 100 ? ' phase-current' : '');
+    card.onclick = () => showPage('phase' + p.id);
+    card.innerHTML = '<div class="pc-num">PHASE ' + p.id + '</div>' +
+      '<div class="pc-title">' + p.label + '</div>' +
+      '<div class="pc-bar"><div class="pc-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="pc-pct">' + done + ' / ' + p.total + ' tasks — ' + pct + '%</div>';
+    grid.appendChild(card);
+  });
+}
+
+// === COPY CODE ===
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// === TOAST ===
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  const tm = document.getElementById('toast-msg');
+  tm.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// === MANTRAS ===
+const MANTRAS = [
+  '"Verifeye does not detect AI. Verifeye certifies reality."',
+  '"Done beats perfect. A working product beats a perfect plan."',
+  '"One phase at a time. This phase is the only phase."',
+  '"ONE Newsroom Pro customer covers all your costs. Get one."',
+  '"Your competitor is not another product. Your competitor is doubt."',
+  '"Every error has a Stack Overflow answer. Google the exact message."',
+  '"You are the architect. Claude Code is the builder. Both are needed."'
+];
+let mantraIdx = 0;
+function rotateMantras() {
+  const el = document.getElementById('mantra-text');
+  if (!el) return;
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.textContent = MANTRAS[mantraIdx];
+    el.style.opacity = '1';
+    mantraIdx = (mantraIdx + 1) % MANTRAS.length;
+  }, 300);
+  setInterval(() => {
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.textContent = MANTRAS[mantraIdx];
+      el.style.opacity = '1';
+      mantraIdx = (mantraIdx + 1) % MANTRAS.length;
+    }, 300);
+  }, 8000);
+}
+
+// Mantra fade transition
+const style = document.createElement('style');
+style.textContent = '.mantra-text { transition: opacity 0.3s ease; }';
+document.head.appendChild(style);
+</script>
+</body>
+</html>
